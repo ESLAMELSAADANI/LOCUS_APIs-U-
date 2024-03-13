@@ -31,14 +31,14 @@ class CommentController extends Controller
     }
 
     /**
-     * Update the specified comment in storage.
+     * edit the specified comment in storage.
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  \App\Models\Post  $post
      * @param  \App\Models\Comment  $comment
      * @return \Illuminate\Http\JsonResponse
      */
-    public function update(Request $request, Post $post, Comment $comment)
+    public function edit(Request $request, Post $post, Comment $comment)
     {
         $request->validate([
             'comment' => 'required|string|max:1000',
@@ -49,7 +49,7 @@ class CommentController extends Controller
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        // Update the comment
+        // edit the comment
         $comment->update(['comment' => $request->comment]);
 
         return response()->json(['message' => 'Comment updated successfully']);

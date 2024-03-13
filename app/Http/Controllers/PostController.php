@@ -43,7 +43,7 @@ class PostController extends Controller
      * @param  \App\Models\Post  $post
      * @return \Illuminate\Http\JsonResponse
      */
-    public function update(Request $request, Post $post)
+    public function edit(Request $request, Post $post)
     {
         // Check if the authenticated user owns the post
         if ($post->user_id !== auth()->id()) {
@@ -55,7 +55,7 @@ class PostController extends Controller
             'image' => 'image|max:2048', // Adjust validation rules as per your requirements
         ]);
 
-        // Update the post record
+        // edit the post record
         $post->caption = $request->caption;
 
         if ($request->hasFile('image')) {

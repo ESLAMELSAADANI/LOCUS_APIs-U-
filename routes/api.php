@@ -39,8 +39,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/posts', [PostController::class, 'store']);
     Route::get('/posts', [PostController::class, 'index']);
 
-    // Update an existing post
-    Route::put('/posts/{post}', [PostController::class, 'update']);
+    // edit an existing post
+    Route::put('/posts/{post}', [PostController::class, 'edit']);
 
     // Delete an existing post
     Route::delete('/posts/{post}', [PostController::class, 'destroy']);
@@ -51,6 +51,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Routes for managing comments
     Route::post('/posts/{post}/comment', [CommentController::class, 'store']); // Route for adding a comment
-    Route::put('/posts/{post}/comments/{comment}', [CommentController::class, 'update']); // Route for updating a comment
+    Route::put('/posts/{post}/comments/{comment}', [CommentController::class, 'edit']); // Route for updating a comment
     Route::delete('/posts/{post}/comments/{comment}', [CommentController::class, 'destroy']); // Route for deleting a comment
 });
