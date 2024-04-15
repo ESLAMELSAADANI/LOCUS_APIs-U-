@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use App\Notifications\EmailVerificationNotification;
 
 class AuthController extends Controller
 {
@@ -26,7 +27,11 @@ class AuthController extends Controller
 
         $token = $user->createToken('api_token')->plainTextToken;
 
-        return response()->json(['message' => 'User added successfully'], 201);
+
+        $user->notify(new EmailVerificationNotification());
+
+
+        return response()->json(['message' => 'User added successfully,check your email for verification.', 'token' => $token], 201); //when we added email verification, don't forget to add plz check ur email
     }
 
     public function login(Request $request)

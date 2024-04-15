@@ -107,7 +107,7 @@ class PostController extends Controller
         // Return the posts with full URLs in the response
         return response()->json([
             'message' => 'All posts retrieved successfully',
-            'photos' => $posts
+            'Posts' => $posts
         ], 200);
     }
 }
