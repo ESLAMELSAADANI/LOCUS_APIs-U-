@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use Aws\S3\S3Client;
+use Aws\S3\Exception\S3Exception;
+
 use Illuminate\Http\Request;
 use App\Models\Post;
 use Illuminate\Support\Facades\Storage;
@@ -22,18 +25,22 @@ class PostController extends Controller
         ]);
 
         // Store the uploaded image
-        $imagePath = $request->file('image')->store('users_photo', 'public');
+        $imagePath = $request->file('image')->store('users_photo', 's3');
+
+        // Set the ACL of the uploaded image to "public-read"
+        Storage::disk('s3')->setVisibility($imagePath, 'public');
+
+        // Get the full URL for the image path
+        $photoUrl = Storage::disk('s3')->url($imagePath);
 
         // Create a new post record
         $post = new Post();
         $post->user_id = auth()->id();
         $post->caption = $request->caption;
-        // Here we are using the Storage facade to get the URL
-        $photoUrl = \Illuminate\Support\Facades\Storage::url($imagePath);
         $post->image_path = $photoUrl;
         $post->save();
 
-        return response()->json(['message' => 'Post created successfully', 'post_id' => $post->id], 201);
+        return response()->json(['message' => 'Post created successfully', 'post_id' => $post->id, 'image_path' => $photoUrl], 201);
     }
 
     /**
@@ -60,17 +67,23 @@ class PostController extends Controller
 
         if ($request->hasFile('image')) {
             // Delete the old image
-            Storage::delete($post->image_path);
+            Storage::disk('s3')->delete($post->image_path);
 
             // Store the new image
-            $imagePath = $request->file('image')->store('users_photo', 'public');
-            $photoUrl = \Illuminate\Support\Facades\Storage::url($imagePath);
-            $post->image_path = $photoUrl;
+            $imagePath = $request->file('image')->store('users_photo', 's3');
+
+            // Set the ACL of the uploaded image to "public-read"
+            Storage::disk('s3')->setVisibility($imagePath, 'public');
+
+            // Get the full URL for the image path
+            $photoUrl = Storage::disk('s3')->url($imagePath);
+
+            $post->image_path = $imagePath;
         }
 
         $post->save();
 
-        return response()->json(['message' => 'Post updated successfully']);
+        return response()->json(['message' => 'Post updated successfully', 'image_path' => $photoUrl]);
     }
 
     /**
@@ -87,27 +100,28 @@ class PostController extends Controller
         }
 
         // Delete the image associated with the post
-        Storage::delete($post->image_path);
+        Storage::disk('s3')->delete($post->image_path);
 
         // Delete the post record
         $post->delete();
 
         return response()->json(['message' => 'Post deleted successfully']);
     }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function index()
     {
-        // Fetch all photos from the database
+        // Fetch all posts from the database
         $posts = Post::all();
 
-        // Add full URL to each photo
-        // foreach ($photos as $photo) {
-        //     $photo->full_path = Storage::url($photo->image_path);
-        // }
-
-        // Return the posts with full URLs in the response
+        // Return the posts in the response
         return response()->json([
             'message' => 'All posts retrieved successfully',
-            'Posts' => $posts
+            'posts' => $posts
         ], 200);
     }
 }

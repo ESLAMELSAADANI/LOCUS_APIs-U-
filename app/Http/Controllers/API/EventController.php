@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers\API;
 
+use Aws\S3\S3Client;
+
+
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Event;
 use Illuminate\Support\Facades\Storage;
-
 
 class EventController extends Controller
 {
@@ -15,7 +17,7 @@ class EventController extends Controller
         $events = Event::all();
 
         $eventsWithImageURLs = $events->map(function ($event) {
-            $event->image = Storage::url('images/' . $event->image);
+            $event->image = Storage::disk('s3')->url('events/' . $event->image);
             return $event;
         });
 
@@ -34,7 +36,7 @@ class EventController extends Controller
 
         // Iterate over the events to modify the image path
         foreach ($events as $event) {
-            $event->image = Storage::url('images/' . $event->image);
+            $event->image = Storage::disk('s3')->url('events/' . $event->image);
         }
 
         // Return the events
